@@ -4,6 +4,6 @@ type ErrorMessage struct {
 	Message string `json:"message"`
 }
 
-func Msg(message string) *ErrorMessage {
+func NewErrorMsg(message string) *ErrorMessage {
 	return &ErrorMessage{Message: message}
 }

@@ -2,6 +2,7 @@ package user
 
 import (
 	b64 "encoding/base64"
+	"log"
 	"net/http"
 	"time"
 
@@ -25,16 +26,21 @@ func createHandler(db *gorm.DB) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		var request newUserRequest
 		if err := ctx.BindJSON(&request); err != nil {
-			ctx.JSON(http.StatusBadRequest, failure.Msg("Could not deserialize json"))
+			failure.BadRequest(ctx, "Could not deserialize json")
 			return
 		}
 		bytes, err := bcrypt.GenerateFromPassword([]byte(request.PlainTextPassword), 14)
 		if err != nil {
-			ctx.JSON(http.StatusInternalServerError, failure.Msg("Could not hash the password"))
+			failure.InternalError(ctx, "Could not hash the password")
 			return
 		}
 		user := newUser(request.Username, bytes)
-		db.Create(user)
+		res := db.Create(user)
+		if res.Error != nil {
+			log.Printf("Error saving user to db: %s", res.Error.Error())
+			failure.InternalError(ctx, "Error saving user to DB")
+			return
+		}
 		ctx.JSON(http.StatusCreated, newResponse(user))
 	}
 }
