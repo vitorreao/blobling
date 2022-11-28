@@ -27,7 +27,7 @@ func main() {
 	router.Use(gin.Logger())
 	api := router.Group("/api")
 	api.Use(user.ValidateSession)
-	user.AddRoutes(api, db)
+	user.AddRoutes(api.Group("/users"), db)
 
 	port := getPort()
 	router.Run(":" + port)

@@ -6,5 +6,6 @@ import (
 )
 
 func AddRoutes(rg *gin.RouterGroup, db *gorm.DB) {
+	db.AutoMigrate(&User{})
 	rg.POST("/", createHandler(db))
 }
