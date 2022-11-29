@@ -20,6 +20,7 @@ type newUserRequest struct {
 type newUserResponse struct {
 	Username  string    `json:"username"`
 	CreatedAt time.Time `json:"createdAt"`
+	UpdatedAt time.Time `json:"updatedAt"`
 }
 
 func createHandler(db *gorm.DB) gin.HandlerFunc {
@@ -47,9 +48,12 @@ func createHandler(db *gorm.DB) gin.HandlerFunc {
 
 func newUser(usr string, pw []byte) *User {
 	pwHash := b64.StdEncoding.EncodeToString(pw)
-	return &User{Username: usr, PasswordHash: pwHash}
+	now := time.Now().UTC().Format(time.RFC3339)
+	return &User{Username: usr, PasswordHash: pwHash, CreatedAt: now, UpdatedAt: now}
 }
 
 func newResponse(user *User) *newUserResponse {
-	return &newUserResponse{user.Username, user.CreatedAt}
+	createdAt, _ := time.Parse(time.RFC3339, user.CreatedAt)
+	updatedAt, _ := time.Parse(time.RFC3339, user.UpdatedAt)
+	return &newUserResponse{Username: user.Username, CreatedAt: createdAt, UpdatedAt: updatedAt}
 }
